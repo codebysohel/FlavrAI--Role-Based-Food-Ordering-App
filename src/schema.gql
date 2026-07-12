@@ -1,0 +1,234 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthResponse {
+  token: String!
+  user: UserResponse!
+}
+
+enum Country {
+  AMERICA
+  INDIA
+}
+
+input CreateOrderInput {
+  items: [OrderItemInput!]!
+  notes: String
+  restaurantId: String!
+}
+
+input CreatePaymentInput {
+  orderId: String!
+  paymentMethodId: String!
+}
+
+input CreatePaymentMethodInput {
+  config: String
+  country: String!
+  name: String!
+  type: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type MenuItemType {
+  category: String!
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  imageUrl: String
+  isAvailable: Boolean!
+  isVegetarian: Boolean!
+  name: String!
+  price: Float!
+  restaurant: RestaurantType
+  restaurantId: String!
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  cancelOrder(id: ID!): OrderWithDetails!
+  createOrder(input: CreateOrderInput!): OrderWithDetails!
+  createPayment(input: CreatePaymentInput!): PaymentType!
+  createPaymentMethod(input: CreatePaymentMethodInput!): PaymentMethodTypeObj!
+  deletePaymentMethod(id: ID!): PaymentMethodTypeObj!
+  login(input: LoginInput!): AuthResponse!
+  register(input: RegisterInput!): AuthResponse!
+  updateOrderStatus(input: UpdateOrderStatusInput!): OrderWithDetails!
+  updatePaymentMethod(id: ID!, input: UpdatePaymentMethodInput!): PaymentMethodTypeObj!
+}
+
+input OrderItemInput {
+  menuItemId: String!
+  quantity: Int!
+}
+
+type OrderItemType {
+  createdAt: DateTime!
+  id: ID!
+  menuItemId: String!
+  orderId: String!
+  quantity: Float!
+  totalPrice: Float!
+  unitPrice: Float!
+}
+
+enum OrderStatus {
+  CANCELLED
+  CONFIRMED
+  DELIVERED
+  PENDING
+  PREPARING
+}
+
+type OrderType {
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  notes: String
+  restaurantId: String!
+  status: OrderStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type OrderWithDetails {
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  items: [OrderItemType!]!
+  notes: String
+  restaurantId: String!
+  restaurantName: String!
+  status: OrderStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum PaymentMethodType {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  UPI
+  WALLET
+}
+
+type PaymentMethodTypeObj {
+  config: String
+  country: Country!
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  name: String!
+  type: PaymentMethodType!
+  updatedAt: DateTime!
+}
+
+enum PaymentStatus {
+  COMPLETED
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+type PaymentType {
+  amount: Float!
+  createdAt: DateTime!
+  id: ID!
+  orderId: String!
+  paymentMethodId: String!
+  processedAt: DateTime
+  status: PaymentStatus!
+  transactionId: String
+  updatedAt: DateTime!
+}
+
+type Query {
+  allPaymentMethods: [PaymentMethodTypeObj!]!
+  menuItems: [MenuItemType!]!
+  myOrders: [OrderType!]!
+  order(id: ID!): OrderWithDetails!
+  orders: [OrderWithDetails!]!
+  paymentMethods: [PaymentMethodTypeObj!]!
+  restaurant(id: ID!): RestaurantType!
+  restaurantMenu(restaurantId: ID!): [MenuItemType!]!
+  restaurants: [RestaurantType!]!
+  user(id: ID!): UserType!
+  users: [UserType!]!
+  usersByCountry(country: String!): [UserType!]!
+}
+
+input RegisterInput {
+  country: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  role: String!
+}
+
+type RestaurantType {
+  address: String!
+  city: String!
+  country: Country!
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  isActive: Boolean!
+  menuItems: [MenuItemType!]!
+  name: String!
+  rating: Float!
+  updatedAt: DateTime!
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+input UpdateOrderStatusInput {
+  orderId: String!
+  status: String!
+}
+
+input UpdatePaymentMethodInput {
+  config: String
+  isActive: Boolean
+  name: String
+  type: String
+}
+
+type UserResponse {
+  country: String!
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  id: String!
+  isActive: Boolean!
+  lastName: String!
+  role: String!
+}
+
+type UserType {
+  country: Country!
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  id: ID!
+  isActive: Boolean!
+  lastName: String!
+  role: Role!
+  updatedAt: DateTime!
+}

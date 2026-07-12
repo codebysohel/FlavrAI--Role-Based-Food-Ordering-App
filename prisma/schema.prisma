@@ -1,0 +1,155 @@
+// Role-Based Food Ordering System - Prisma Schema
+// Supports RBAC (Role-Based Access Control) and ReBAC (Relationship-Based Access Control)
+// NOTE: Using SQLite for local development. Enums are represented as String fields.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String
+  firstName       String
+  lastName        String
+  role            String           @default("MEMBER")  // ADMIN, MANAGER, MEMBER
+  country         String            // INDIA, AMERICA
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  // Relations
+  orders          Order[]
+  paymentMethods  PaymentMethod[]
+  
+  @@index([email])
+  @@index([role])
+}
+
+model Restaurant {
+  id              String         @id @default(uuid())
+  name            String
+  description     String?
+  address         String
+  city            String
+  rating          Float          @default(0.0)
+  isActive        Boolean        @default(true)
+  country         String         // INDIA, AMERICA
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relations
+  menuItems       MenuItem[]
+  orders          Order[]
+  
+  @@index([country])
+  @@index([isActive])
+  @@index([city])
+}
+
+model MenuItem {
+  id              String         @id @default(uuid())
+  name            String
+  description     String?
+  price           Float
+  category        String
+  isVegetarian    Boolean        @default(false)
+  isAvailable     Boolean        @default(true)
+  imageUrl        String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relations
+  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId    String
+  orderItems      OrderItem[]
+  
+  @@index([restaurantId])
+  @@index([category])
+  @@index([isAvailable])
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  userId          String
+  restaurantId    String
+  status          String         @default("PENDING")  // PENDING, CONFIRMED, PREPARING, DELIVERED, CANCELLED
+  totalAmount     Float
+  notes           String?
+  country         String         // INDIA, AMERICA
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relations
+  user            User           @relation(fields: [userId], references: [id])
+  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
+  items           OrderItem[]
+  payment         Payment?
+  
+  @@index([userId])
+  @@index([restaurantId])
+  @@index([status])
+  @@index([country])
+}
+
+model OrderItem {
+  id              String         @id @default(uuid())
+  orderId         String
+  menuItemId      String
+  quantity        Int            @default(1)
+  unitPrice       Float
+  totalPrice      Float
+  createdAt       DateTime       @default(now())
+  
+  // Relations
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem        MenuItem       @relation(fields: [menuItemId], references: [id])
+  
+  @@unique([orderId, menuItemId])
+}
+
+model Payment {
+  id              String          @id @default(uuid())
+  orderId         String          @unique
+  paymentMethodId String
+  amount          Float
+  status          String          @default("PENDING")  // PENDING, COMPLETED, FAILED, REFUNDED
+  transactionId   String?         @unique
+  processedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Relations
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod   PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
+  
+  @@index([status])
+}
+
+model PaymentMethod {
+  id              String            @id @default(uuid())
+  name            String
+  type            String            // CREDIT_CARD, DEBIT_CARD, CASH, UPI, WALLET
+  isActive        Boolean           @default(true)
+  country         String            // INDIA, AMERICA
+  config          String?           // JSON string for payment gateway config
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  payments        Payment[]
+  users           User[]
+  
+  @@index([country])
+  @@index([isActive])
+  @@index([type])
+}

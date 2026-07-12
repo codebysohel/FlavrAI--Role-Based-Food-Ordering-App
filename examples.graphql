@@ -1,0 +1,485 @@
+# ==========================================
+# GraphQL Example Queries & Mutations
+# Food Ordering System - Testing Guide
+# ==========================================
+
+# Before running these queries, start the server:
+# npm run start:dev
+# Visit: http://localhost:3000/graphql
+
+# ==========================================
+# 1. AUTHENTICATION
+# ==========================================
+
+# Login as India Admin
+mutation Login {
+  login(input: {
+    email: "admin.india@foodapp.com"
+    password: "admin123"
+  }) {
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      role
+      country
+      isActive
+    }
+  }
+}
+
+# Login as India Manager
+mutation LoginManager {
+  login(input: {
+    email: "manager.india@foodapp.com"
+    password: "manager123"
+  }) {
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      role
+      country
+    }
+  }
+}
+
+# Login as India Member
+mutation LoginMember {
+  login(input: {
+    email: "member1.india@foodapp.com"
+    password: "member123"
+  }) {
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      role
+      country
+    }
+  }
+}
+
+# Login as America Admin
+mutation LoginAmericaAdmin {
+  login(input: {
+    email: "admin.america@foodapp.com"
+    password: "admin123"
+  }) {
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      role
+      country
+    }
+  }
+}
+
+# Register a new user
+mutation Register {
+  register(input: {
+    email: "newuser@foodapp.com"
+    password: "password123"
+    firstName: "New"
+    lastName: "User"
+    role: MEMBER
+    country: INDIA
+  }) {
+    token
+    user {
+      id
+      email
+      firstName
+      lastName
+      role
+      country
+    }
+  }
+}
+
+# ==========================================
+# 2. RESTAURANTS & MENU (All Roles)
+# ==========================================
+
+# NOTE: Add Authorization header with Bearer token
+# Authorization: Bearer <your-token-here>
+
+# View all restaurants (restricted to user's country)
+query Restaurants {
+  restaurants {
+    id
+    name
+    description
+    address
+    city
+    rating
+    country
+    isActive
+  }
+}
+
+# View single restaurant
+query Restaurant {
+  restaurant(id: "restaurant-id-here") {
+    id
+    name
+    description
+    address
+    city
+    rating
+    country
+  }
+}
+
+# View all menu items (restricted to user's country)
+query MenuItems {
+  menuItems {
+    id
+    name
+    description
+    price
+    category
+    isVegetarian
+    isAvailable
+    restaurant {
+      id
+      name
+    }
+  }
+}
+
+# View restaurant menu
+query RestaurantMenu {
+  restaurantMenu(restaurantId: "restaurant-id-here") {
+    id
+    name
+    description
+    price
+    category
+    isVegetarian
+    isAvailable
+  }
+}
+
+# ==========================================
+# 3. ORDERS
+# ==========================================
+
+# Create an order (All roles)
+mutation CreateOrder {
+  createOrder(input: {
+    restaurantId: "restaurant-id-here"
+    notes: "Extra spicy please"
+    items: [
+      {
+        menuItemId: "menu-item-id-1"
+        quantity: 2
+      }
+      {
+        menuItemId: "menu-item-id-2"
+        quantity: 1
+      }
+    ]
+  }) {
+    id
+    userId
+    restaurantId
+    status
+    totalAmount
+    notes
+    country
+    createdAt
+    items {
+      id
+      menuItemId
+      quantity
+      unitPrice
+      totalPrice
+    }
+  }
+}
+
+# View my orders (All roles)
+query MyOrders {
+  myOrders {
+    id
+    status
+    totalAmount
+    notes
+    createdAt
+    items {
+      id
+      menuItemId
+      quantity
+      unitPrice
+      totalPrice
+    }
+    restaurantId
+    restaurantName
+  }
+}
+
+# View single order
+query Order {
+  order(id: "order-id-here") {
+    id
+    status
+    totalAmount
+    notes
+    country
+    createdAt
+    items {
+      id
+      menuItemId
+      quantity
+      unitPrice
+      totalPrice
+    }
+    restaurantId
+    restaurantName
+  }
+}
+
+# View all orders (Admin & Manager only)
+query AllOrders {
+  orders {
+    id
+    status
+    totalAmount
+    country
+    createdAt
+    userId
+    restaurantId
+    restaurantName
+    items {
+      id
+      menuItemId
+      quantity
+      totalPrice
+    }
+  }
+}
+
+# Update order status (Admin & Manager only)
+mutation UpdateOrderStatus {
+  updateOrderStatus(input: {
+    orderId: "order-id-here"
+    status: "CONFIRMED"
+  }) {
+    id
+    status
+    totalAmount
+    createdAt
+    items {
+      id
+      quantity
+      totalPrice
+    }
+    restaurantName
+  }
+}
+
+# Cancel order (Admin & Manager only)
+mutation CancelOrder {
+  cancelOrder(id: "order-id-here") {
+    id
+    status
+    totalAmount
+    createdAt
+    restaurantName
+  }
+}
+
+# ==========================================
+# 4. PAYMENTS
+# ==========================================
+
+# View payment methods (All roles, restricted to country)
+query PaymentMethods {
+  paymentMethods {
+    id
+    name
+    type
+    isActive
+    country
+  }
+}
+
+# View all payment methods (Admin & Manager only)
+query AllPaymentMethods {
+  allPaymentMethods {
+    id
+    name
+    type
+    isActive
+    country
+    createdAt
+  }
+}
+
+# Create payment / Checkout (Admin & Manager only)
+mutation CreatePayment {
+  createPayment(input: {
+    orderId: "order-id-here"
+    paymentMethodId: "payment-method-id-here"
+  }) {
+    id
+    orderId
+    paymentMethodId
+    amount
+    status
+    transactionId
+    processedAt
+  }
+}
+
+# ==========================================
+# 5. PAYMENT METHOD MANAGEMENT (Admin only)
+# ==========================================
+
+# Create payment method (Admin only)
+mutation CreatePaymentMethod {
+  createPaymentMethod(input: {
+    name: "Wallet"
+    type: "WALLET"
+    country: "INDIA"
+    config: "{\"provider\": \"Paytm\"}"
+  }) {
+    id
+    name
+    type
+    isActive
+    country
+    config
+  }
+}
+
+# Update payment method (Admin only)
+mutation UpdatePaymentMethod {
+  updatePaymentMethod(
+    id: "payment-method-id-here"
+    input: {
+      name: "Updated Payment Method"
+      isActive: false
+    }
+  ) {
+    id
+    name
+    type
+    isActive
+    country
+  }
+}
+
+# Delete payment method (Admin only)
+mutation DeletePaymentMethod {
+  deletePaymentMethod(id: "payment-method-id-here") {
+    id
+    name
+    type
+  }
+}
+
+# ==========================================
+# 6. USER MANAGEMENT
+# ==========================================
+
+# View all users (Admin only, sees all countries)
+query AllUsers {
+  users {
+    id
+    email
+    firstName
+    lastName
+    role
+    country
+    isActive
+    createdAt
+  }
+}
+
+# View users by country (Admin & Manager)
+query UsersByCountry {
+  usersByCountry(country: "INDIA") {
+    id
+    email
+    firstName
+    lastName
+    role
+    country
+    isActive
+  }
+}
+
+# View single user (Admin & Manager)
+query User {
+  user(id: "user-id-here") {
+    id
+    email
+    firstName
+    lastName
+    role
+    country
+    isActive
+    createdAt
+  }
+}
+
+# ==========================================
+# TESTING RBAC & ReBAC
+# ==========================================
+
+# Test 1: Member tries to create payment (should fail - needs Admin/Manager)
+# Login as member1.india@foodapp.com and run:
+mutation MemberCreatePayment {
+  createPayment(input: {
+    orderId: "order-id"
+    paymentMethodId: "payment-method-id"
+  }) {
+    id
+    status
+  }
+}
+
+# Test 2: India user tries to view America data (should fail - ReBAC)
+# Login as India user and try to access America restaurant
+# This is enforced automatically by country-based filtering
+
+# Test 3: Member tries to cancel order (should fail - needs Admin/Manager)
+mutation MemberCancelOrder {
+  cancelOrder(id: "order-id-here") {
+    id
+    status
+  }
+}
+
+# Test 4: Admin can see all users across countries
+# Login as admin.india@foodapp.com
+query AdminAllUsers {
+  users {
+    id
+    email
+    role
+    country
+  }
+}
+
+# Test 5: Manager can only see users from their country
+# Login as manager.india@foodapp.com
+query ManagerUsers {
+  users {
+    id
+    email
+    role
+    country
+  }
+}
