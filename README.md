@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🍔 Role-Based Food Ordering System
 
 A production-ready, scalable backend system built with **NestJS**, **GraphQL**, and **Prisma** featuring Role-Based Access Control (RBAC) and Relationship-Based Access Control (ReBAC).
@@ -537,3 +538,7 @@ For issues or questions:
 ---
 
 **Built with ❤️ using NestJS, GraphQL, and Prisma**
+=======
+# FlavrAI Role-Based-Food-Ordering-App
+FlavrAI- Role Based Food Ordering App represents a highly scalable commercial solution built for the modern food technology industry. Designed to address the operational challenges faced by expanding enterprise restaurant networks, this platform streamlines digital food distribution and vendor logistics on a global scale. 
+>>>>>>> 06138bbd834083475974ea54793d27933de284e0
